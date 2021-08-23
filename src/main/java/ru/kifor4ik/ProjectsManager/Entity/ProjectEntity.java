@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.Set;
 
 @Entity
+@Table(name = "project_entity")
 public class ProjectEntity {
 
     @Id
@@ -27,7 +28,6 @@ public class ProjectEntity {
     @NotEmpty(message = "AccessCode should be not empty")
     @Size(min = 10, max = 10, message = "Access code should be 10 symbols")
     private String accessCode;
-
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "project")
     public List<TaskEntity> taskList;

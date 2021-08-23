@@ -1,9 +1,8 @@
 package ru.kifor4ik.ProjectsManager.Entity;
 
-import org.hibernate.validator.constraints.UniqueElements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -13,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "user_entity")
 public class UserEntity {
 
     @Id
@@ -28,6 +28,8 @@ public class UserEntity {
 
     @NotEmpty(message = "Password should not be empty")
     private String password;
+
+    private SimpleGrantedAuthority role = new SimpleGrantedAuthority("USER");
 
     @ManyToMany
     @JoinTable(
@@ -78,5 +80,13 @@ public class UserEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public SimpleGrantedAuthority getRole() {
+        return role;
+    }
+
+    public void setRole(SimpleGrantedAuthority role) {
+        this.role = role;
     }
 }

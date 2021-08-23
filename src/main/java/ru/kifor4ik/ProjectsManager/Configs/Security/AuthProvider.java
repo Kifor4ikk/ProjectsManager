@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import ru.kifor4ik.ProjectsManager.Exeptions.UserNotFoundExeption;
 import ru.kifor4ik.ProjectsManager.Service.UserService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -31,7 +33,6 @@ public class AuthProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
         System.out.println("Mail - " + authentication.getName());
-        System.out.println("password - " + authentication.getCredentials().toString());
 
         UserEntity user = null;
         try {
@@ -45,7 +46,9 @@ public class AuthProvider implements AuthenticationProvider {
         }
 
         List<GrantedAuthority> roles = new ArrayList<>();
-        return new UsernamePasswordAuthenticationToken(user, null, roles);
+        roles.add(user.getRole());
+
+        return new UsernamePasswordAuthenticationToken(user.getEmail(), null, roles);
     }
 
 
