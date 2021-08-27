@@ -26,6 +26,19 @@ public class TaskEntity {
     @JoinColumn(name = "project_id")
     private ProjectEntity project;
 
+    @Transient
+    private Long projectId;
+
+    private Status TaskStatus;
+
+    public Status getTaskStatus() {
+        return TaskStatus;
+    }
+
+    public void setTaskStatus(Status taskStatus) {
+        TaskStatus = taskStatus;
+    }
+
     public TaskEntity(){}
 
     public static TaskEntity fromModel(ProjectEntity projectEntity, TaskModel model){
@@ -36,9 +49,7 @@ public class TaskEntity {
 
         return entity;
     }
-    public Long getProjectId(){
-        return this.project.getId();
-    }
+
 
     public ProjectEntity getProject() {
         return project;
@@ -71,4 +82,13 @@ public class TaskEntity {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
+    }
+
+    public Long getProjectId(){
+        return this.project.getId();
+    }
 }
+

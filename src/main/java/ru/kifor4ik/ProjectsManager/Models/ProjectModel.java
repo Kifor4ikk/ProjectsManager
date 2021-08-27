@@ -2,6 +2,7 @@ package ru.kifor4ik.ProjectsManager.Models;
 
 
 import ru.kifor4ik.ProjectsManager.Entity.ProjectEntity;
+import ru.kifor4ik.ProjectsManager.Entity.Status;
 import ru.kifor4ik.ProjectsManager.Entity.TaskEntity;
 import ru.kifor4ik.ProjectsManager.Entity.UserEntity;
 
@@ -31,7 +32,7 @@ public class ProjectModel {
         model.setAccessCode(entity.getAccessCode());
 
         for (TaskEntity task : entity.taskList){
-            listOfTasks.add(TaskModel.toModel(task));
+            if(task.getTaskStatus().equals(Status.ACTIVE)) listOfTasks.add(TaskModel.toModel(task));
         }
         model.setListOfTasks(listOfTasks);
 

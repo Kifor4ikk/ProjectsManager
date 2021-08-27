@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "user_entity")
 public class UserEntity {
@@ -29,7 +30,7 @@ public class UserEntity {
     @NotEmpty(message = "Password should not be empty")
     private String password;
 
-    private SimpleGrantedAuthority role = new SimpleGrantedAuthority("USER");
+    private Roles role;
 
     @ManyToMany
     @JoinTable(
@@ -39,6 +40,7 @@ public class UserEntity {
     )
     private Set<ProjectEntity> projects = new HashSet<>();
 
+    private Status UserStatus;
 
     public UserEntity(){}
 
@@ -82,11 +84,19 @@ public class UserEntity {
         this.password = password;
     }
 
-    public SimpleGrantedAuthority getRole() {
+    public Status getUserStatus() {
+        return UserStatus;
+    }
+
+    public void setUserStatus(Status userStatus) {
+        UserStatus = userStatus;
+    }
+
+    public Roles getRole() {
         return role;
     }
 
-    public void setRole(SimpleGrantedAuthority role) {
+    public void setRole(Roles role) {
         this.role = role;
     }
 }

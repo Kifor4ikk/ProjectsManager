@@ -1,28 +1,25 @@
 package ru.kifor4ik.ProjectsManager.Models;
 
-import ru.kifor4ik.ProjectsManager.Entity.Status;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.kifor4ik.ProjectsManager.Entity.TaskEntity;
+import ru.kifor4ik.ProjectsManager.Exeptions.ProjectNotFoundException;
+import ru.kifor4ik.ProjectsManager.Service.ProjectService;
 
-
-public class TaskModel {
+public class NewTaskModel {
 
     private String name;
     private String body;
     private Long projectId;
 
-    private Status taskStatus;
+    public NewTaskModel(){ }
 
-    public TaskModel(){ }
+    public static TaskEntity toEntity(NewTaskModel model) throws ProjectNotFoundException {
+        TaskEntity entity = new TaskEntity();
 
-    public static TaskModel toModel(TaskEntity entity){
-        TaskModel model = new TaskModel();
-
-        model.setProjectId(entity.getProjectId());
-        model.setName(entity.getName());
-        model.setBody(entity.getBody());
-        model.setTaskStatus(entity.getTaskStatus());
-
-        return model;
+        entity.setName(model.getName());
+        entity.setBody(model.getBody());
+        entity.setProjectId(model.getProjectId());
+        return entity;
     }
 
     public Long getProjectId() {
@@ -49,11 +46,4 @@ public class TaskModel {
         this.body = body;
     }
 
-    public Status getTaskStatus() {
-        return taskStatus;
-    }
-
-    public void setTaskStatus(Status taskStatus) {
-        this.taskStatus = taskStatus;
-    }
 }

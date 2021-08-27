@@ -17,7 +17,7 @@ public class ProjectEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private Long adminId;
 
@@ -39,6 +39,16 @@ public class ProjectEntity {
             inverseJoinColumns = { @JoinColumn(name = "user_id")}
     )
     public Set<UserEntity> users = new HashSet<>();
+
+    public Status projectStatus;
+
+    public Status getProjectStatus() {
+        return projectStatus;
+    }
+
+    public void setProjectStatus(Status projectStatus) {
+        this.projectStatus = projectStatus;
+    }
 
     public Set<UserEntity> getUsers() {
         return users;
@@ -90,11 +100,11 @@ public class ProjectEntity {
     public ProjectEntity() { }
 
     public Long getId() {
-        return Id;
+        return id;
     }
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
 
     public Long getAdminId() {

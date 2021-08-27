@@ -2,13 +2,17 @@ package ru.kifor4ik.ProjectsManager.Service;
 
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.kifor4ik.ProjectsManager.Entity.ProjectEntity;
+import ru.kifor4ik.ProjectsManager.Entity.Status;
+import ru.kifor4ik.ProjectsManager.Entity.TaskEntity;
 import ru.kifor4ik.ProjectsManager.Entity.UserEntity;
 import ru.kifor4ik.ProjectsManager.Exeptions.ProjectAlreadyExistException;
 import ru.kifor4ik.ProjectsManager.Exeptions.ProjectNotFoundException;
 import ru.kifor4ik.ProjectsManager.Exeptions.UserNotFoundExeption;
+import ru.kifor4ik.ProjectsManager.Models.NewProjectModel;
 import ru.kifor4ik.ProjectsManager.Models.ProjectModel;
 import ru.kifor4ik.ProjectsManager.Repository.ProjectRepository;
 import ru.kifor4ik.ProjectsManager.Repository.UserRepository;
@@ -31,26 +35,27 @@ public class ProjectService {
      * @param projectModel include project NAME and ADMIN ID
      *                     Admin is first project user and who can create, update, read, delete tasks
      *                     of this project.
-     *                     And ALL projects have personaly access code which genereted here.
+     *                     And ALL projects have personally access code which generated here.
      *                     user can join to project by using special code
      * @return New project with ID and first user
      * @throws ProjectAlreadyExistException if project with current name already exist
      * @throws UserNotFoundExeption if trying create project with admin who not exist
      */
-    public ProjectEntity newProject(ProjectModel projectModel) throws ProjectAlreadyExistException, UserNotFoundExeption {
+    public ProjectEntity newProject(NewProjectModel projectModel, String adminEmail) throws ProjectAlreadyExistException, UserNotFoundExeption {
 
         if(projectRepository.findByName(projectModel.getName()) != null) throw new ProjectAlreadyExistException("Project with this name already exist");
 
-        UserEntity user = userRepository.findById(projectModel.getAdminId()).get();
+        UserEntity user = userRepository.findByEmail(adminEmail);
         if(user == null) throw new UserNotFoundExeption("User who should be admin not found");
 
-        ProjectEntity project = ProjectEntity.fromModel(projectModel);
+        ProjectEntity project = NewProjectModel.toEntity(projectModel);
 
         do{
             project.setAccessCode(ProjectEntity.generateCode());
         } while(projectRepository.findByAccessCode(project.getAccessCode()) != null);
         projectRepository.save(project);
-
+        project.setAdminId(user.getId());
+        project.setProjectStatus(Status.ACTIVE);
         user.getProjects().add(project);
         userRepository.save(user);
         projectRepository.save(project);
@@ -66,8 +71,14 @@ public class ProjectService {
      */
     public ProjectEntity findById(Long id) throws ProjectNotFoundException {
 
+
         try {
-            return projectRepository.findById(id).get();
+            ProjectEntity project = projectRepository.findById(id).get();
+            if(project.getProjectStatus().equals(Status.ACTIVE)){
+                return project;
+            } else {
+                throw new ProjectNotFoundException("Project not found");
+            }
         } catch (NoSuchElementException e) {
             throw new ProjectNotFoundException("Project not found");
         }
@@ -82,13 +93,12 @@ public class ProjectService {
      * @throws ProjectNotFoundException - project not found
      * @throws ProjectAlreadyExistException - project with NEW name already exist
      */
-    public ProjectEntity editProject(Long id, ProjectModel projectNew) throws ProjectNotFoundException, ProjectAlreadyExistException {
+    public ProjectEntity editProject(Long id, NewProjectModel projectNew) throws ProjectNotFoundException, ProjectAlreadyExistException {
 
         ProjectEntity project = this.findById(id);
         if(projectRepository.findByName(projectNew.getName()) != null){
             throw new ProjectAlreadyExistException("Project with current name already exist!");
         }
-        project.setAdminId(projectNew.getAdminId());
         project.setName(projectNew.getName());
 
         return projectRepository.save(project);
@@ -100,20 +110,24 @@ public class ProjectService {
      * @return deleted project
      * @throws ProjectNotFoundException - project not found
      */
-    public ProjectEntity deleteProject(Long id) throws ProjectNotFoundException {
+    public boolean deleteProject(Long id) throws ProjectNotFoundException {
         ProjectEntity project = findById(id);
-        projectRepository.delete(project);
-        return project;
+        for(TaskEntity task : project.taskList){
+            task.setTaskStatus(Status.DELETED);
+        }
+        project.setProjectStatus(Status.DELETED);
+        projectRepository.save(project);
+        return true;
     }
 
     /**
      * Get all projects, func for profiles with admin authority
      * @return List of all projects
      */
-    public List<ProjectModel> getAll(){
+    public List<ProjectModel> getAll(Pageable pageable){
 
         List<ProjectModel> projectModelList = new ArrayList<>();
-        for(ProjectEntity task : projectRepository.findAll()){
+        for(ProjectEntity task : projectRepository.findAll(pageable)){
             projectModelList.add(ProjectModel.toModel(task));
         }
         return projectModelList;

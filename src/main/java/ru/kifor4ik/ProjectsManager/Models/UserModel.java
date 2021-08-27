@@ -1,6 +1,8 @@
 package ru.kifor4ik.ProjectsManager.Models;
 
 import ru.kifor4ik.ProjectsManager.Entity.ProjectEntity;
+import ru.kifor4ik.ProjectsManager.Entity.Roles;
+import ru.kifor4ik.ProjectsManager.Entity.Status;
 import ru.kifor4ik.ProjectsManager.Entity.UserEntity;
 
 import java.util.ArrayList;
@@ -14,6 +16,9 @@ public class UserModel {
 
     private List<ProjectModel> projectList;
 
+    private Roles role;
+    private Status status;
+
     public UserModel(){};
 
     public static UserModel toModel(UserEntity entity){
@@ -21,12 +26,15 @@ public class UserModel {
         List<ProjectModel> projectList = new ArrayList<>();
         model.setId(entity.getId());
         model.setNickname(entity.getNickname());
-
+        model.setRole(entity.getRole());
+        model.setStatus(entity.getUserStatus());
         Iterator<ProjectEntity> iterator = entity.getProjects().iterator();
         while(iterator.hasNext()){
-            projectList.add(ProjectModel.toModel(iterator.next()));
+            ProjectEntity projectModel = iterator.next();
+            if(projectModel.getProjectStatus().equals(Status.ACTIVE)){
+                projectList.add(ProjectModel.toModel(projectModel));
+            }
         }
-
         model.setProjectList(projectList);
         return model;
     }
@@ -54,5 +62,21 @@ public class UserModel {
 
     public void setNickname(String nickname) {
         Nickname = nickname;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Roles getRole() {
+        return role;
+    }
+
+    public void setRole(Roles role) {
+        this.role = role;
     }
 }

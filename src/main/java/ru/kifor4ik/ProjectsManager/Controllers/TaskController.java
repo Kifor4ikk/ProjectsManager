@@ -1,7 +1,11 @@
 package ru.kifor4ik.ProjectsManager.Controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.kifor4ik.ProjectsManager.Configs.Security.Security;
@@ -9,6 +13,7 @@ import ru.kifor4ik.ProjectsManager.Entity.TaskEntity;
 import ru.kifor4ik.ProjectsManager.Exeptions.ProjectNotFoundException;
 import ru.kifor4ik.ProjectsManager.Exeptions.TaskNotExistException;
 import ru.kifor4ik.ProjectsManager.Exeptions.YouAreNotAdminException;
+import ru.kifor4ik.ProjectsManager.Models.NewTaskModel;
 import ru.kifor4ik.ProjectsManager.Models.TaskModel;
 import ru.kifor4ik.ProjectsManager.Service.ProjectService;
 import ru.kifor4ik.ProjectsManager.Service.TaskService;
@@ -28,17 +33,11 @@ public class TaskController {
     public UserService userService;
 
     @PostMapping
-    public ResponseEntity newTask(@RequestParam Long projectId, @RequestBody TaskModel task) {
+    public ResponseEntity newTask(@RequestBody NewTaskModel model) {
 
         try {
-
-            if(projectService.findById(projectId).getAdminId().equals(SecurityContextHolder.getContext().getAuthentication().getName()) ||
-            SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ADMIN")){
-                return ResponseEntity.ok().body(TaskModel.toModel(taskService.newTask(projectId, task)).getName() + " successfully created");
-            } else{
-                throw new YouAreNotAdminException("You have no rights");
-            }
-
+            return ResponseEntity.ok().body(TaskModel.toModel(taskService.newTask(model,
+                    "test@test")).getName() + " successfully created");
 
         } catch (ProjectNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -80,8 +79,10 @@ public class TaskController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity getAllTasks() {
-        return ResponseEntity.ok().body(taskService.getAllTasks());
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity getAllTasks(@PageableDefault(sort = {"id"},direction = Sort.Direction.DESC, page = 0,size = 5,value = 5) Pageable pageable,
+                                      @RequestParam(required = false) long size, @RequestParam(required = false) long page) {
+        return ResponseEntity.ok().body(taskService.getAllTasks(pageable));
     }
 
 }

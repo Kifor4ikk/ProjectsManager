@@ -1,10 +1,11 @@
 package ru.kifor4ik.ProjectsManager.Repository;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import ru.kifor4ik.ProjectsManager.Entity.TaskEntity;
 
-import java.util.List;
+public interface TaskRepository extends PagingAndSortingRepository<TaskEntity, Long> {
 
-public interface TaskRepository extends CrudRepository<TaskEntity, Long> {
-
+    Page<TaskEntity> findAll(Pageable pageable);
 }

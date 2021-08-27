@@ -2,15 +2,21 @@ package ru.kifor4ik.ProjectsManager.Service;
 
 import com.sun.xml.bind.v2.TODO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.kifor4ik.ProjectsManager.Configs.Security.Security;
 import ru.kifor4ik.ProjectsManager.Entity.ProjectEntity;
+import ru.kifor4ik.ProjectsManager.Entity.Roles;
+import ru.kifor4ik.ProjectsManager.Entity.Status;
 import ru.kifor4ik.ProjectsManager.Exeptions.ProjectNotFoundException;
 import ru.kifor4ik.ProjectsManager.Exeptions.UserAlreadyExistExeption;
 import ru.kifor4ik.ProjectsManager.Exeptions.UserNotFoundExeption;
 import ru.kifor4ik.ProjectsManager.Entity.UserEntity;
+import ru.kifor4ik.ProjectsManager.Exeptions.WrongStatusCodeException;
+import ru.kifor4ik.ProjectsManager.Models.RegistrationModel;
 import ru.kifor4ik.ProjectsManager.Models.UserModel;
 import ru.kifor4ik.ProjectsManager.Repository.ProjectRepository;
 import ru.kifor4ik.ProjectsManager.Repository.UserRepository;
@@ -38,19 +44,20 @@ public class UserService {
      * @return new User
      * @throws UserAlreadyExistExeption user with current name, email already exist
      */
-    public UserEntity registration(UserEntity user) throws UserAlreadyExistExeption {
+    public UserEntity registration(RegistrationModel user) throws UserAlreadyExistExeption {
+
 
         if (userRepository.findByNickname(user.getNickname()) != null) {
             throw new UserAlreadyExistExeption("User with this name already exist");
         }
         if(userRepository.findByEmail(user.getEmail()) != null){
-            System.out.println("EXIST");
             throw new UserAlreadyExistExeption("User with this Email already exist");
         }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        return userRepository.save(user);
+        UserEntity userEntity = RegistrationModel.toEntity(user);
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userEntity.setRole(Roles.USER);
+        userEntity.setUserStatus(Status.ACTIVE);
+        return userRepository.save(userEntity);
     }
 
     /**
@@ -63,6 +70,10 @@ public class UserService {
 
         try {
             UserEntity user = userRepository.findById(id).get();
+
+            if(user.getUserStatus().equals(Status.DELETED) || user.getUserStatus().equals(Status.BANNED)){
+                throw new UserNotFoundExeption("User not found");
+            }
             return user;
 
         } catch (NoSuchElementException e) {
@@ -79,7 +90,7 @@ public class UserService {
     public UserEntity findByEmail(String email) throws UserNotFoundExeption {
 
         UserEntity user = userRepository.findByEmail(email);
-        if(user == null) {
+        if(user == null || user.getUserStatus().equals(Status.DELETED) || user.getUserStatus().equals(Status.BANNED)) {
             throw new UserNotFoundExeption("User with current mail not found");
         }
         return user;
@@ -95,7 +106,8 @@ public class UserService {
      */
     public UserEntity editUser(Long id, UserEntity entityUpdate) throws UserNotFoundExeption, UserAlreadyExistExeption {
 
-        if (this.findById(id) != null && id == entityUpdate.getId()) {
+        if (this.findById(id) != null && id == entityUpdate.getId() &&
+                !entityUpdate.getUserStatus().equals(Status.DELETED) && !entityUpdate.getUserStatus().equals(Status.BANNED)) {
 
             if (userRepository.findByNickname(entityUpdate.getNickname()) != null) {
                 throw new UserAlreadyExistExeption("User with current name already exist!");
@@ -109,30 +121,15 @@ public class UserService {
     }
 
     /**
-     *
-     * @param id of used who should be deleted
-     * @return deleted user
-     * @throws UserNotFoundExeption - if user not exist
-     */
-    public UserModel delete(Long id) throws UserNotFoundExeption {
-
-        UserModel model = UserModel.toModel(this.findById(id));
-        if (model != null) {
-            userRepository.deleteById(id);
-        }
-        return model;
-    }
-
-    /**
      * OnlyAdmins
      * Func for user who has admin authority
      * @return list of ALL PROJECTS
      */
-    public List<UserModel> getAll() {
+    public List getAll(Pageable pageable) {
 
         List<UserModel> list = new ArrayList<>();
 
-        for (UserEntity entity : userRepository.findAll()) {
+        for (UserEntity entity : userRepository.findAll(pageable)) {
             list.add(UserModel.toModel(entity));
         }
 
@@ -167,5 +164,43 @@ public class UserService {
         return false;
     }
 
+    public boolean giveAdminRights(String email) throws UserNotFoundExeption {
+        UserEntity user = userRepository.findByEmail(email);
+        if(user == null) {
+            throw new UserNotFoundExeption("User with current mail not found");
+        }
+        user.setRole(Roles.ADMIN);
+        userRepository.save(user);
+        return true;
+    }
 
+    public boolean setProfileStatus(String email, int status) throws UserNotFoundExeption, WrongStatusCodeException {
+        UserEntity user = userRepository.findByEmail(email);
+        if(user == null) {
+            throw new UserNotFoundExeption("User with current mail not found");
+        }
+        if(status < 0 && status > 2){
+            throw new WrongStatusCodeException("Wrong status code");
+        }
+
+
+        switch (status){
+            case 0: {
+                user.setUserStatus(Status.ACTIVE);
+                break;
+            }
+            case 1:{
+                user.setUserStatus(Status.DELETED);
+
+                break;
+            }
+            case 2:{
+                user.setUserStatus(Status.BANNED);
+                break;
+            }
+        }
+
+        userRepository.save(user);
+        return true;
+    }
 }

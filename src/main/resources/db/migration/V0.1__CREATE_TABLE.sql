@@ -32,6 +32,6 @@ insert into hibernate_sequence values ( 1 );
              email varchar(255),
              nickname varchar(25),
              password varchar(255),
-             role bytea,
+             role int4,
              primary key (id)
      );
