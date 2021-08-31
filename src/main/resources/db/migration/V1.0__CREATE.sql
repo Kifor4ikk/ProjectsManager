@@ -1,4 +1,4 @@
-SET search_path TO projectmanager,public;
+SET search_path TO projectmanager;
 SHOW search_path;
 
 create table user_entity
