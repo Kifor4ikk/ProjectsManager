@@ -1,0 +1,23 @@
+server:
+  port: 1488
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:1489/ProjectManager
+    schemas: projectmanager
+    username: postgres
+    password: pass
+
+
+flyway:
+  user: postgres
+  password: pass
+  schemas: projectmanager
+
+jwt:
+  token:
+    secret: Hitler
+    validTime: 8640000
+
+
