@@ -14,11 +14,8 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDTO {
-
     private String name;
     private String email;
     private Roles role;
     private Status status;
-
-
 }

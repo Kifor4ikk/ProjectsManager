@@ -54,8 +54,10 @@ public class UserController {
 
     @PreAuthorize(value = "hasAnyAuthority('ADMIN')")
     @GetMapping("/all")
-    public Page<User> getAll(@RequestParam(defaultValue = "0",required = false) int page,
-                             @RequestParam(defaultValue = "5",required = false) int size){
-        return userService.getAll(page, size);
+    public Page<User> getAll(@RequestParam(defaultValue = "0", required = false) int page,
+                             @RequestParam(defaultValue = "5", required = false) int size,
+                             @RequestParam(defaultValue = "null", required = false) String name,
+                             @RequestParam(defaultValue = "null", required = false) String email){
+        return userService.getAll(page, size, name , email);
     }
 }

@@ -1,10 +1,12 @@
-SET search_path TO projectmanager,public;
-SHOW search_path;
 
-create table user_entity
+create schema IF NOT EXISTS project_manager;
+
+SET search_path TO PROJECT_MANAGER, public;
+
+create table IF NOT EXISTS user_entity
 (
 	ID bigserial not null,
-	name varchar(25) not null unique,
+	name varchar(25) not null,
 	email varchar not null unique,
 	password varchar not null,
 	role smallint not null,
@@ -12,7 +14,7 @@ create table user_entity
 	constraint pk_user_entity_ID primary key (ID)
 );
 
-create table project_entity
+create table IF NOT EXISTS project_entity
 (
 	ID bigserial not null,
 	adminId bigint not null,
@@ -22,7 +24,7 @@ create table project_entity
 	constraint pk_project_entity_ID primary key (ID)
 );
 
-create table task_entity
+create table IF NOT EXISTS task_entity
 (
 	ID bigserial not null,
 	projectid bigserial not null,
@@ -33,7 +35,7 @@ create table task_entity
 	constraint pk_task_entity_ID primary key (ID)
 );
 
-create table user_project
+create table IF NOT EXISTS user_project
 (
 	userId bigint not null,
 	projectId bigint not null,

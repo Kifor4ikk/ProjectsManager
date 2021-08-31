@@ -26,13 +26,16 @@ public class TaskService {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     /**
      *
      * @param model, model of Task to create new or edit
      * @return Ok msg if created or msg about problem
      */
     public String newTask(TaskCreateModel model){
-        if(projectService.findById(model.getProjectId()) == null) return "Project not found";
+        if(projectRepository.findById(model.getProjectId()) == null) return "Project not found";
 
         Task task = new Task();
         task.setName(model.getName());

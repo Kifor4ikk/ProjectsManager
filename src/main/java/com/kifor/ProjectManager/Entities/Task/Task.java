@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 
 @Entity
-@Table(name = "task_entity", schema = "projectmanager")
+@Table(name = "task_entity", schema = "project_manager")
 @Getter
 @Setter
 @AllArgsConstructor

@@ -44,8 +44,10 @@ public class ProjectService {
         do{
             project.setAccessCode(generateCode(10));
         } while (projectRepository.findByAccessCode(project.getAccessCode()) != null);
-        projectRepository.save(project);
-        projectRepository.addUserToProject(project.getAdminId(), projectRepository.findByAccessCode(project.getAccessCode()).getId());
+        try{
+            projectRepository.save(project);
+            projectRepository.addUserToProject(project.getAdminId(), projectRepository.findByAccessCode(project.getAccessCode()).getId());
+        } catch (Exception e){ }
         return project.getName() + " was created!";
     }
 

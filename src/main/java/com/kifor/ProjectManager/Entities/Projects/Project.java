@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "project_entity", schema = "projectmanager")
+@Table(name = "project_entity", schema = "project_manager")
 @Getter
 @Setter
 @AllArgsConstructor

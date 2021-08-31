@@ -1,21 +1,16 @@
 package com.kifor.ProjectManager.Entities.User;
 
 
-import com.kifor.ProjectManager.Entities.Projects.Project;
 import com.kifor.ProjectManager.Entities.Status;
 import lombok.*;
-
 import javax.persistence.*;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "user_entity", schema = "projectmanager")
+@Table(name = "user_entity", schema = "project_manager")
 @Getter
 @Setter
 @AllArgsConstructor

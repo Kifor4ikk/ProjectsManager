@@ -45,8 +45,8 @@ public class UserService {
      * @throws UserAlreadyExistException
      */
     public String newUser(UserRegistrationModel user) throws UserAlreadyExistException {
-        if(userRepository.findByName(user.getName()) != null)
-            return "User with current name already exist!";
+//        if(userRepository.findByName(user.getName()) != null)
+//            return "User with current name already exist!";
 
         if(userRepository.findByEmail(user.getEmail()) != null)
             return "User with current email already exist!";
@@ -118,22 +118,25 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public Page<User> getAll(int page, int size){
+    public Page<User> getAll(int page, int size, String name, String email){
         final Pageable pageable = PageRequest.of(page, size);
 
 //        List<User> list = userRepository.findAll(pageable).stream()
 //                .map(userMapper::toDTO)
 //                .collect(Collectors.toList());
-
-        List<User> list = userRepository.findAll(pageable).stream()
-                .collect(Collectors.toList());
+        List<User> list = null;
+        System.out.println(name + "  ----- " + email);
+        if(name != null || email != null){
+            list = userRepository.findAll(name, email);
+        } else{
+            list = userRepository.findAll();
+        }
 
         for(User user : list){
             user = findById(user.getId());
         }
         return new PageImpl<User>(list, pageable, list.size());
     }
-
 
     public UserDTO toDTO(User user){
         UserDTO model = new UserDTO();
